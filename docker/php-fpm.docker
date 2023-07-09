@@ -1,0 +1,74 @@
+FROM php:7-fpm
+
+WORKDIR /app
+
+RUN apt-get update
+
+RUN mkdir -p /usr/share/man/man1
+
+RUN apt-get install -y libgmp-dev re2c libmhash-dev libmcrypt-dev file
+RUN ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/local/include/
+RUN docker-php-ext-configure gmp
+RUN docker-php-ext-install gmp
+
+RUN docker-php-ext-install opcache
+
+RUN apt install -y libxslt-dev
+RUN docker-php-ext-install xsl
+
+RUN apt-get install -y zlib1g-dev libzip-dev
+RUN docker-php-ext-install zip
+
+RUN docker-php-ext-install bcmath
+RUN docker-php-ext-install exif
+
+RUN apt-get install -y libtidy-dev
+RUN docker-php-ext-install tidy
+RUN docker-php-ext-enable tidy
+
+RUN apt-get install -y libjpeg-dev libfreetype6-dev libpng-dev
+RUN docker-php-ext-configure gd \
+        --with-freetype=/usr/include/freetype2 \
+        --with-jpeg=/usr/include
+RUN docker-php-ext-install gd
+
+RUN apt-get install -y libxml2-dev
+RUN docker-php-ext-install soap
+
+RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-enable pdo_mysql
+
+RUN apt-get install -y libpq-dev
+RUN docker-php-ext-install pdo pdo_pgsql pgsql
+RUN docker-php-ext-enable pdo_pgsql
+
+RUN pecl install igbinary
+RUN docker-php-ext-enable igbinary
+
+RUN pecl install redis
+RUN docker-php-ext-enable redis
+
+RUN pecl install xdebug-3.1.6
+#RUN pecl install xdebug
+RUN docker-php-ext-enable xdebug
+
+RUN pecl install xhprof
+RUN docker-php-ext-enable xhprof
+
+RUN mkdir -p /app/xhprof
+RUN cp -r /usr/local/lib/php/xhprof_html /app/xhprof
+RUN cp -r /usr/local/lib/php/xhprof_lib /app/xhprof
+
+RUN apt-get install -y libyaml-dev
+RUN pecl install yaml
+RUN docker-php-ext-enable yaml
+
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
+RUN composer self-update
+
+RUN apt-get install -y git
+RUN apt-get install -y sudo
+RUN apt-get install -y wget
+RUN apt-get install -y mc

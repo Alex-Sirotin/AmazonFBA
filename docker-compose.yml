@@ -1,0 +1,10 @@
+version: "3"
+services:
+  php-fpm:
+    build:
+      context: ./docker
+      dockerfile: php-fpm.docker
+    container_name: php-fpm-valigara
+    volumes:
+      - ./:/app
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/user_php.ini
